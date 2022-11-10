@@ -11,6 +11,8 @@ enum BfCommand {
     BlockEnd
 }
 
+// TODO: rewrite this with a type that supports runtime sizing
+// Array only support compile time static sizing
 type BfCode = [BfCommand;106];
 
 struct BfMemory<'a> {
