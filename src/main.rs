@@ -60,24 +60,19 @@ fn translate_string_to_bf_code(str_code: &String) -> BfCode {
 
 fn move_cursor_right(memory: &mut BfMemory) {
     let new_middle = memory.right.pop_front();
+    memory.left.push_back(*memory.middle);
     match new_middle {
-        None          => (),
-        Some(command) => {
-            memory.left.push_back(*memory.middle);
-            *memory.middle = command;
-        }
-
+        None    => {*memory.middle = 0;},
+        Some(x) => {*memory.middle = x;}
     }
 }
 
 fn move_cursor_left(memory: &mut BfMemory) {
     let new_middle = memory.left.pop_back();
+    memory.right.push_front(*memory.middle);
     match new_middle {
-        None          => (),
-        Some(command) => {
-            memory.right.push_front(*memory.middle);
-            *memory.middle = command;
-        }
+        None    => {*memory.middle = 0;},
+        Some(x) => {*memory.middle = x;}
     }
 }
 
@@ -92,7 +87,7 @@ fn decr_val(memory: &mut BfMemory) {
 fn to_ascii(i: &i32) -> char {
     match *i {
         x@0..=127 => x as u8 as char,
-        _ => ' ',
+        _         => {panic!("'{i}' can't be translated to char.");},
     }
 }
 
