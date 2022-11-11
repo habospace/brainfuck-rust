@@ -27,7 +27,7 @@ struct BfMemory<'a> {
 }
 
 struct BfProgram<'a> {
-    code: BfCode,
+    code:   BfCode,
     memory: &'a mut BfMemory<'a>,
 }
 
