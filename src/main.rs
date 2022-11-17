@@ -147,7 +147,7 @@ fn run_bf_program(execution: &mut BfProgramExecution) {
             BfCommand::BlockStart  => {
                 if execution.program.memory.middle == 0 {
                     match block_starts_ends_map.get(&i) {
-                        None => (),
+                        None            => (),
                         Some(block_end) => {i = block_end + 1;}
                     }
                 } else {
