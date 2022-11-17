@@ -20,20 +20,20 @@ type BlockEndIndex = usize;
 
 type BfCode = BTreeMap<Index, BfCommand>;
 
-struct BfMemory<'a> {
-    right:  &'a mut LinkedList<i32>,
-    middle: &'a mut i32,
-    left:   &'a mut LinkedList<i32>,
+struct BfMemory {
+    right:  LinkedList<i32>,
+    middle: i32,
+    left:   LinkedList<i32>,
 }
 
-struct BfProgram<'a> {
+struct BfProgram {
     code:   BfCode,
-    memory: &'a mut BfMemory<'a>,
+    memory: BfMemory,
 }
 
 struct BfProgramExecution<'a> {
     print_chars: &'a mut LinkedList<char>,
-    program:     &'a mut BfProgram<'a>
+    program:     &'a mut BfProgram
 }
 
 fn char_to_bf_command(c: char) -> BfCommand {
@@ -60,28 +60,28 @@ fn translate_string_to_bf_code(str_code: &String) -> BfCode {
 
 fn move_cursor_right(memory: &mut BfMemory) {
     let new_middle = memory.right.pop_front();
-    memory.left.push_back(*memory.middle);
+    memory.left.push_back(memory.middle);
     match new_middle {
-        None    => {*memory.middle = 0;},
-        Some(x) => {*memory.middle = x;}
+        None    => {memory.middle = 0;},
+        Some(x) => {memory.middle = x;}
     }
 }
 
 fn move_cursor_left(memory: &mut BfMemory) {
     let new_middle = memory.left.pop_back();
-    memory.right.push_front(*memory.middle);
+    memory.right.push_front(memory.middle);
     match new_middle {
-        None    => {*memory.middle = 0;},
-        Some(x) => {*memory.middle = x;}
+        None    => {memory.middle = 0;},
+        Some(x) => {memory.middle = x;}
     }
 }
 
 fn incr_val(memory: &mut BfMemory) {
-    *memory.middle += 1;
+    memory.middle += 1;
 }
 
 fn decr_val(memory: &mut BfMemory) {
-    *memory.middle -= 1;
+    memory.middle -= 1;
 }
 
 fn to_ascii(i: &i32) -> char {
@@ -135,17 +135,17 @@ fn run_bf_program(execution: &mut BfProgramExecution) {
             Some(c) => *c
         };
         match command {
-            BfCommand::IncrPointer => {move_cursor_right(execution.program.memory); i+=1;}
-            BfCommand::DecrPointer => {move_cursor_left(execution.program.memory); i+=1;}
-            BfCommand::Incr        => {incr_val(execution.program.memory); i+=1;}
-            BfCommand::Decr        => {decr_val(execution.program.memory); i+=1;}
+            BfCommand::IncrPointer => {move_cursor_right(&mut execution.program.memory); i+=1;}
+            BfCommand::DecrPointer => {move_cursor_left(&mut execution.program.memory); i+=1;}
+            BfCommand::Incr        => {incr_val(&mut execution.program.memory); i+=1;}
+            BfCommand::Decr        => {decr_val(&mut execution.program.memory); i+=1;}
             BfCommand::Print       => {
-                let print_char: char = to_ascii(execution.program.memory.middle);
+                let print_char: char = to_ascii(&mut execution.program.memory.middle);
                 execution.print_chars.push_back(print_char);
                 i+=1;
             }
             BfCommand::BlockStart  => {
-                if *execution.program.memory.middle == 0 {
+                if execution.program.memory.middle == 0 {
                     match block_starts_ends_map.get(&i) {
                         None => (),
                         Some(block_end) => {i = block_end + 1;}
@@ -155,7 +155,7 @@ fn run_bf_program(execution: &mut BfProgramExecution) {
                 }
             }
             BfCommand::BlockEnd    => {
-                if *execution.program.memory.middle == 0 {
+                if execution.program.memory.middle == 0 {
                     i+=1;
                 } else {
                     match block_ends_starts.get(&i) {
@@ -177,14 +177,14 @@ fn main() {
     );
     let hello_world_bf_code: BfCode = translate_string_to_bf_code(&hello_world_bf_code_str);
     let mut print_chars = LinkedList::new();
-    let mut left = LinkedList::from([0; 1000]);
-    let mut middle = 0;
-    let mut right = LinkedList::from([0; 1000]);
-    let mut bf_memory = BfMemory {
-        left: &mut left, middle: &mut middle, right: &mut right
+    let left = LinkedList::from([0; 1000]);
+    let middle = 0;
+    let right = LinkedList::from([0; 1000]);
+    let bf_memory = BfMemory {
+        left: left, middle: middle, right: right
     };
     let mut bf_program = BfProgram {
-        memory: &mut bf_memory,
+        memory: bf_memory,
         code: hello_world_bf_code
     };
     let mut execution = BfProgramExecution {
